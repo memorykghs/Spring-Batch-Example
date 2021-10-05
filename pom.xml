@@ -12,7 +12,7 @@
 	<artifactId>SpringBatchExmaple</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>SpringBatchExmaple</name>
+	<name>Spring-Batch-Exmaple</name>
 	<description>Spring Batch Example</description>
 	<properties>
 		<java.version>11</java.version>
