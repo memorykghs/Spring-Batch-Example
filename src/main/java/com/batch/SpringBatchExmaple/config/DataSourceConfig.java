@@ -5,14 +5,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 
-@Configuration
-@Order(1)
+//@Configuration
+//@Order(1)
 public class DataSourceConfig {
-    @Value("${DBUrl}")
-    private String dataSourceUrl;
-    
-    @Value("${cub.aco.db.onsConfiguration:N}")
-    private String onsConfiguration;
+//    @Value("${DBUrl}")
+//    private String dataSourceUrl;
+//    
+//    @Value("${cub.aco.db.onsConfiguration:N}")
+//    private String onsConfiguration;
 
 //    @Bean(name = "FXSLOCAL")
 //    @Primary
