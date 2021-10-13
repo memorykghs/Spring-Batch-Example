@@ -6,6 +6,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -22,7 +23,8 @@ import com.batch.SpringBatchExmaple.batch.listener.File001JobListener;
 import com.batch.SpringBatchExmaple.batch.listener.File001ReaderListener;
 import com.batch.SpringBatchExmaple.batch.listener.File001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.File001WriterListener;
-import com.batch.SpringBatchExmaple.dto.CarsDto;
+import com.batch.SpringBatchExmaple.entity.Car;
+import com.batch.SpringBatchExmaple.repository.CarRepo;
 
 
 /**
@@ -39,6 +41,10 @@ public class FileReaderJobConfig {
 	/** StepBuilderFactory */
 	@Autowired
 	private StepBuilderFactory stepBuilderFactory;
+	
+	/** CarRepo */
+	@Autowired
+	private CarRepo carRepo;
 
 	/** Mapping 欄位名稱 */
 	private static final String[] MAPPER_FIELD = new String[] { "Manufacturer", "Type", "MinPrice", "Price" };
@@ -51,7 +57,7 @@ public class FileReaderJobConfig {
 	 * @param step
 	 * @return
 	 */
-	@Bean("File001Job")
+	@Bean
 	public Job fileReaderJob(@Qualifier("File001Step") Step step) {
 		return jobBuilderFactory.get("File001Job")
 				.start(step)
@@ -66,14 +72,15 @@ public class FileReaderJobConfig {
 	 * @param jpaTransactionManager
 	 * @return
 	 */
-	@Bean
-	public Step fileReaderStep(ItemReader<CarsDto> itemReader, ItemWriter<CarsDto> itemWriter,
+	@Bean("File001Step")
+	public Step fileReaderStep(@Qualifier("File001FileReader") ItemReader<Car> itemReader, @Qualifier("File001JpaWriter") ItemWriter<Car> itemWriter,
 			JpaTransactionManager jpaTransactionManager) {
 
 		return stepBuilderFactory.get("File001Step")
 				.transactionManager(jpaTransactionManager)
-				.<CarsDto, CarsDto>chunk(FETCH_SIZE)
-				.reader(itemReader).faultTolerant()
+				.<Car, Car>chunk(FETCH_SIZE)
+				.reader(itemReader)
+				.faultTolerant()
 //                .skip(Exception.class)
 //                .skipLimit(Integer.MAX_VALUE)
 				.writer(itemWriter)
@@ -87,14 +94,15 @@ public class FileReaderJobConfig {
 	 * 建立 FileReader
 	 * @return
 	 */
-	@Bean
-	public ItemReader<CarsDto> getItemReader() {
-		return new FlatFileItemReaderBuilder<CarsDto>().name("File001ItemReader")
-				.resource(new ClassPathResource("file/CARS.csv"))
+	@Bean("File001FileReader")
+	public ItemReader<Car> getItemReader() {
+		return new FlatFileItemReaderBuilder<Car>().name("File001FileReader")
 				.encoding("UTF-8")
+				.resource(new ClassPathResource("file/CARS.csv"))
 				.linesToSkip(1)
 				.delimited()
 				.names(MAPPER_FIELD)
+				.fieldSetMapper(new BeanWrapperFieldSetMapper<Car>())
 				// .lineMapper(getCarLineMapper())
 				.build();
 	}
@@ -103,20 +111,33 @@ public class FileReaderJobConfig {
 	 * 建立 FileReader mapping 規則
 	 * @return
 	 */
-	private LineMapper<CarsDto> getCarLineMapper() {
-		DefaultLineMapper<CarsDto> bookInfoLineMapper = new DefaultLineMapper<>();
+	private LineMapper<Car> getCarLineMapper() {
+		DefaultLineMapper<Car> bookInfoLineMapper = new DefaultLineMapper<>();
 
 		// 1. 設定每一筆資料的欄位拆分規則，預設以逗號拆分
 		DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
 		tokenizer.setNames(MAPPER_FIELD);
 
 		// 2. 設定資料轉換到程式面的規則
-		 BeanWrapperFieldSetMapper<CarsDto> fieldSetMapper = new
-		 BeanWrapperFieldSetMapper<>();
-		 fieldSetMapper.setTargetType(CarsDto.class);
+		BeanWrapperFieldSetMapper<Car> fieldSetMapper = new
+		BeanWrapperFieldSetMapper<>();
+		fieldSetMapper.setTargetType(Car.class);
 
 		bookInfoLineMapper.setLineTokenizer(tokenizer);
 		bookInfoLineMapper.setFieldSetMapper(fieldSetMapper);
 		return bookInfoLineMapper;
+	}
+	
+	/**
+	 * 建立 Jpa ItemWriter
+	 * @return
+	 */
+	@Bean("File001JpaWriter")
+	public ItemWriter<Car> getItemWriter(){
+		
+		return new RepositoryItemWriterBuilder<Car>()
+				.repository(carRepo)
+				.methodName("save")
+				.build();
 	}
 }
