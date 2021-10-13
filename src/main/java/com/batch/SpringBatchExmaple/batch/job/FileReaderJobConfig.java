@@ -6,7 +6,6 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -23,8 +22,12 @@ import com.batch.SpringBatchExmaple.batch.listener.File001JobListener;
 import com.batch.SpringBatchExmaple.batch.listener.File001ReaderListener;
 import com.batch.SpringBatchExmaple.batch.listener.File001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.File001WriterListener;
+<<<<<<< HEAD
 import com.batch.SpringBatchExmaple.entity.Car;
 import com.batch.SpringBatchExmaple.repository.CarRepo;
+=======
+import com.batch.SpringBatchExmaple.dto.CarsDto;
+>>>>>>> cea486d284359f688f611ec9fa15dc883e269b3c
 
 
 /**
@@ -57,7 +60,7 @@ public class FileReaderJobConfig {
 	 * @param step
 	 * @return
 	 */
-	@Bean
+	@Bean("File001Job")
 	public Job fileReaderJob(@Qualifier("File001Step") Step step) {
 		return jobBuilderFactory.get("File001Job")
 				.start(step)
