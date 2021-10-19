@@ -1,4 +1,4 @@
-package com.batch.SpringBatchExmaple.entity;
+package com.batch.SpringBatchExample.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

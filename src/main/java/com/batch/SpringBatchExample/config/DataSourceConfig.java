@@ -1,4 +1,4 @@
-package com.batch.SpringBatchExmaple.config;
+package com.batch.SpringBatchExample.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

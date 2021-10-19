@@ -1,4 +1,4 @@
-package com.batch.SpringBatchExmaple.batch.listener;
+package com.batch.SpringBatchExample.batch.listener;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ItemWriteListener;
 
-import com.batch.SpringBatchExmaple.dto.CarsDto;
+import com.batch.SpringBatchExample.dto.CarsDto;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.batch.SpringBatchExmaple.config;
+package com.batch.SpringBatchExample.config;
 
 import javax.sql.DataSource;
 

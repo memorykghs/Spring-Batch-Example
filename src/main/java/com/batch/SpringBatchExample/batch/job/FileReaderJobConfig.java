@@ -1,4 +1,4 @@
-package com.batch.SpringBatchExmaple.batch.job;
+package com.batch.SpringBatchExample.batch.job;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -6,6 +6,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -18,16 +19,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
-import com.batch.SpringBatchExmaple.batch.listener.File001JobListener;
-import com.batch.SpringBatchExmaple.batch.listener.File001ReaderListener;
-import com.batch.SpringBatchExmaple.batch.listener.File001StepListener;
-import com.batch.SpringBatchExmaple.batch.listener.File001WriterListener;
-<<<<<<< HEAD
-import com.batch.SpringBatchExmaple.entity.Car;
-import com.batch.SpringBatchExmaple.repository.CarRepo;
-=======
-import com.batch.SpringBatchExmaple.dto.CarsDto;
->>>>>>> cea486d284359f688f611ec9fa15dc883e269b3c
+import com.batch.SpringBatchExample.batch.listener.File001JobListener;
+import com.batch.SpringBatchExample.batch.listener.File001ReaderListener;
+import com.batch.SpringBatchExample.batch.listener.File001StepListener;
+import com.batch.SpringBatchExample.batch.listener.File001WriterListener;
+import com.batch.SpringBatchExample.entity.Car;
+import com.batch.SpringBatchExample.repository.CarRepo;
 
 
 /**
@@ -101,12 +98,14 @@ public class FileReaderJobConfig {
 	public ItemReader<Car> getItemReader() {
 		return new FlatFileItemReaderBuilder<Car>().name("File001FileReader")
 				.encoding("UTF-8")
-				.resource(new ClassPathResource("file/CARS.csv"))
+				// .resource(new FileSystemResource("D:/DevTools/Projects/Spring-Batch-Example/resources/file/Cars.csv"))
+				 .resource(new ClassPathResource("file1/Cars.csv"))
+				// .resource(new PathResource("D:/DevTools/Projects/Spring-Batch-Example/file/CARS.csv"))
 				.linesToSkip(1)
-				.delimited()
-				.names(MAPPER_FIELD)
-				.fieldSetMapper(new BeanWrapperFieldSetMapper<Car>())
-				// .lineMapper(getCarLineMapper())
+//				.delimited()
+//				.names(MAPPER_FIELD)
+//				.fieldSetMapper(new BeanWrapperFieldSetMapper<Car>())
+				 .lineMapper(getCarLineMapper())
 				.build();
 	}
 

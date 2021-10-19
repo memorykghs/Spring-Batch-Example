@@ -1,4 +1,4 @@
-package com.batch.SpringBatchExmaple;
+package com.batch.SpringBatchExample;
 
 import java.util.Date;
 
@@ -21,17 +21,18 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
 @EnableBatchProcessing
-public class SpringBatchExmapleApplication {
+public class SpringBatchExampleApplication {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SpringBatchExmapleApplication.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SpringBatchExampleApplication.class);
 
 	public static void main(String[] args) throws NoSuchJobException, JobExecutionAlreadyRunningException,
 			JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
 		try {
-			String jobName = args[0];
+			// String jobName = args[0];
+			String jobName = "File001Job";
 
-			SpringApplication.run(SpringBatchExmapleApplication.class, args);
-			ConfigurableApplicationContext context = SpringApplication.run(SpringBatchExmapleApplication.class, args);
+			SpringApplication.run(SpringBatchExampleApplication.class, args);
+			ConfigurableApplicationContext context = SpringApplication.run(SpringBatchExampleApplication.class, args);
 			Job job = context.getBean(JobRegistry.class).getJob(jobName);
 			context.getBean(JobLauncher.class).run(job, createJobParams());
 

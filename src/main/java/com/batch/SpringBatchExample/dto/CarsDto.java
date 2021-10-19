@@ -1,4 +1,4 @@
-package com.batch.SpringBatchExmaple.dto;
+package com.batch.SpringBatchExample.dto;
 
 import java.io.Serializable;
 

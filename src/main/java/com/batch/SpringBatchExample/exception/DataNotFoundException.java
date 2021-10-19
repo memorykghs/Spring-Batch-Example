@@ -1,4 +1,4 @@
-package com.batch.SpringBatchExmaple.exception;
+package com.batch.SpringBatchExample.exception;
 
 public class DataNotFoundException extends Exception{
 
