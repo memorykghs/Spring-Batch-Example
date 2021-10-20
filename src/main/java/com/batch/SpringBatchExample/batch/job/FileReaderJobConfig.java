@@ -14,9 +14,10 @@ import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
 import com.batch.SpringBatchExample.batch.listener.File001JobListener;
@@ -25,6 +26,7 @@ import com.batch.SpringBatchExample.batch.listener.File001StepListener;
 import com.batch.SpringBatchExample.batch.listener.File001WriterListener;
 import com.batch.SpringBatchExample.entity.Car;
 import com.batch.SpringBatchExample.repository.CarRepo;
+
 
 
 /**
@@ -60,6 +62,7 @@ public class FileReaderJobConfig {
 	@Bean("File001Job")
 	public Job fileReaderJob(@Qualifier("File001Step") Step step) {
 		return jobBuilderFactory.get("File001Job")
+//				.preventRestart()
 				.start(step)
 				.listener(new File001JobListener())
 				.build();
@@ -95,12 +98,13 @@ public class FileReaderJobConfig {
 	 * @return
 	 */
 	@Bean("File001FileReader")
-	public ItemReader<Car> getItemReader() {
+	public ItemReader<Car> getItemReader(@Value("${inputFilePath}") Resource resource) {
 		return new FlatFileItemReaderBuilder<Car>().name("File001FileReader")
 				.encoding("UTF-8")
-				// .resource(new FileSystemResource("D:/DevTools/Projects/Spring-Batch-Example/resources/file/Cars.csv"))
-				 .resource(new ClassPathResource("file1/Cars.csv"))
-				// .resource(new PathResource("D:/DevTools/Projects/Spring-Batch-Example/file/CARS.csv"))
+				.resource(resource)
+//				 .resource(new FileSystemResource("file:csv/Cars.csv"))
+//				 .resource(new ClassPathResource("\\csv\\Cars.csv"))
+//				.resource(new PathResource("C://Users/user/Desktop/Cars.csv"))
 				.linesToSkip(1)
 //				.delimited()
 //				.names(MAPPER_FIELD)
