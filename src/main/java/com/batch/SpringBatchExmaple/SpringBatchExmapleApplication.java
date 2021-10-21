@@ -1,6 +1,7 @@
 package com.batch.SpringBatchExmaple;
 
-import java.util.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,8 @@ public class SpringBatchExmapleApplication {
 	public static void main(String[] args) throws NoSuchJobException, JobExecutionAlreadyRunningException,
 			JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
 		try {
-			String jobName = args[0];
+//			String jobName = args[0];
+			String jobName = "Db001Job";
 
 			SpringApplication.run(SpringBatchExmapleApplication.class, args);
 			ConfigurableApplicationContext context = SpringApplication.run(SpringBatchExmapleApplication.class, args);
@@ -40,10 +42,14 @@ public class SpringBatchExmapleApplication {
 		}
 	}
 
+	/**
+	 * 產生JobParameter
+	 * @return
+	 */
 	private static JobParameters createJobParams() {
 
 		JobParametersBuilder builder = new JobParametersBuilder();
-		builder.addDate("date", new Date());
+		builder.addDate("executeTime", Timestamp.valueOf(LocalDateTime.now()));
 
 		return builder.toJobParameters();
 	}

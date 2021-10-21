@@ -7,7 +7,7 @@ import org.springframework.batch.core.ItemReadListener;
 import com.batch.SpringBatchExmaple.dto.CarsDto;
 
 /**
- * File001 ReaderListener
+ * Db001 ReaderListener
  * @author memeorykghs
  */
 public class Db001ReaderListener implements ItemReadListener<CarsDto> {
@@ -30,6 +30,4 @@ public class Db001ReaderListener implements ItemReadListener<CarsDto> {
     public void onReadError(Exception ex) {
         LOGGER.error("Db001Reader: 讀取資料失敗", ex);
     }
-
-
 }

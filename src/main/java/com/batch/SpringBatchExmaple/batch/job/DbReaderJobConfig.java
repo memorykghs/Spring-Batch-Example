@@ -15,6 +15,8 @@ import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
+import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -23,12 +25,12 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
-import com.batch.SpringBatchExmaple.batch.listener.D001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001JobListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001ReaderListener;
+import com.batch.SpringBatchExmaple.batch.listener.Db001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001WriterListener;
-import com.batch.SpringBatchExmaple.entity.Car;
-import com.batch.SpringBatchExmaple.repository.CarRepo;
+import com.batch.SpringBatchExmaple.entity.Cars;
+import com.batch.SpringBatchExmaple.repository.CarsRepo;
 
 /**
  * DB -> File
@@ -48,7 +50,7 @@ public class DbReaderJobConfig {
 
 	/** CarRepo */
 	@Autowired
-	private CarRepo carRepo;
+	private CarsRepo carRepo;
 
 	/** 每批件數 */
 	private static int FETCH_SIZE = 10;
@@ -69,6 +71,7 @@ public class DbReaderJobConfig {
 	@Bean
 	public Job dbReaderJob(@Qualifier("Db001Step") Step step) {
 		return jobBuilderFactory.get("Db001Job")
+				// .preventRestart()
 				.start(step)
 				.listener(new Db001JobListener())
 				.build();
@@ -83,18 +86,18 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001Step")
-	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Car> itemReader, @Qualifier("Db001FileWriter") ItemWriter<Car> itemWriter,
+	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Cars> itemReader, @Qualifier("Db001FileWriter") ItemWriter<Cars> itemWriter,
 			JpaTransactionManager transactionManager) {
 
 		return stepBuilderFactory.get("Db001Step")
 				.transactionManager(transactionManager)
-				.<Car, Car>chunk(FETCH_SIZE)
+				.<Cars, Cars>chunk(FETCH_SIZE)
 				.reader(itemReader)
 				.faultTolerant()
 //                .skip(Exception.class)
 //                .skipLimit(Integer.MAX_VALUE)
 				.writer(itemWriter)
-				.listener(new D001StepListener())
+				.listener(new Db001StepListener())
 				.listener(new Db001ReaderListener())
 				.listener(new Db001WriterListener())
 				.build();
@@ -106,17 +109,17 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001JpaReader")
-	public RepositoryItemReader<Car> itemReader() {
+	public RepositoryItemReader<Cars> itemReader() {
 
-		 Map<String, Direction> sortMap = new HashMap<>();
-		 sortMap.put("MANUFACTURER", Direction.ASC);
-		 sortMap.put("TYPE", Direction.ASC);
+		Map<String, Direction> sortMap = new HashMap<>();
+		sortMap.put("Manufacturer", Direction.ASC);
+		sortMap.put("Type", Direction.ASC);
 
-		return new RepositoryItemReaderBuilder<Car>()
+		return new RepositoryItemReaderBuilder<Cars>()
 				.name("Db001JpaReader")
 				.pageSize(FETCH_SIZE)
 				.repository(carRepo)
-				.methodName("findAllByDateRange")
+				.methodName("findAll")
 				// .arguments(args)
 				 .sorts(sortMap) // 必要
 				.build();
@@ -127,23 +130,24 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001FileWriter")
-	public FlatFileItemWriter<Car> customFlatFileWriter() {
+	public FlatFileItemWriter<Cars> customFlatFileWriter() {
 
 		String fileName = new SimpleDateFormat("yyyyMMddHHmmssS").format(new Date());
 
-		// BeanWrapperFieldExtractor<Car> fieldExtractor = new BeanWrapperFieldExtractor<>();
-		// fieldExtractor.setNames(MAPPER_FIELD);
+		 BeanWrapperFieldExtractor<Cars> fieldExtractor = new BeanWrapperFieldExtractor<>();
+		 fieldExtractor.setNames(MAPPER_FIELD);
 
-		// DelimitedLineAggregator<Car> lineAggreagor = new DelimitedLineAggregator<>();
-		// lineAggreagor.setFieldExtractor(fieldExtractor);
+		 DelimitedLineAggregator<Cars> lineAggreagor = new DelimitedLineAggregator<>();
+		 lineAggreagor.setFieldExtractor(fieldExtractor);
 
-		return new FlatFileItemWriterBuilder<Car>().name("Db001FileWriter")
+		return new FlatFileItemWriterBuilder<Cars>().name("Db001FileWriter")
 				.encoding("UTF-8")
 				.resource(new FileSystemResource("D:/" + fileName + ".csv"))
 				.append(true) // 是否串接在同一個檔案後
-				.delimited()
-				.names(MAPPER_FIELD)
-				// .lineAggregator(lineAggreagor)
+//				.delimited()
+//				.names(MAPPER_FIELD)
+//				.shouldDeleteIfEmpty(true) // 當檔案存在且內容為空，restart時會重新生產一份
+				.lineAggregator(lineAggreagor)
 				.headerCallback(headerCallback -> headerCallback.write(HEADER)) // 使用 headerCallback 寫入表頭
 				.build();
 	}

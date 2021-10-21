@@ -7,12 +7,12 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 
 /**
- * File001 StepListener
+ * Db001 StepListener
  * @author memorykghs
  */
-public class D001StepListener implements StepExecutionListener{
+public class Db001StepListener implements StepExecutionListener{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(D001StepListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Db001StepListener.class);
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
@@ -22,7 +22,7 @@ public class D001StepListener implements StepExecutionListener{
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
         String msg = new StringBuilder()
-                .append("File001Step: 讀取csv檔筆數: ")
+                .append("Db001Step: 讀取DB Table筆數: ")
                 .append(stepExecution.getReadCount())
                 .append(", 成功筆數: ")
                 .append(stepExecution.getWriteCount())

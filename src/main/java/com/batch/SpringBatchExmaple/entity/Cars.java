@@ -13,9 +13,9 @@ import lombok.Data;
 
 @Entity
 @Table(name = "CARS")
-@IdClass(value = CarPK.class)
+@IdClass(value = CarsPK.class)
 @Data
-public class Car implements Serializable {
+public class Cars implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -32,4 +32,8 @@ public class Car implements Serializable {
 	
 	@Column(name = "PRICE")
 	private BigDecimal price;
+	
+	public String getManufacturer() {
+		return this.manufacturer;
+	}
 }

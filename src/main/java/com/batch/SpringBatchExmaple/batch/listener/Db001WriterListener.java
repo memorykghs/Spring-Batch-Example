@@ -10,7 +10,7 @@ import com.batch.SpringBatchExmaple.dto.CarsDto;
 
 
 /**
- * File001 WriterListener
+ * Db001 WriterListener
  * @author memorykghs
  */
 public class Db001WriterListener implements ItemWriteListener<CarsDto> {
