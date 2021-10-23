@@ -14,7 +14,6 @@ import org.springframework.orm.jpa.JpaTransactionManager;
  * @author memorykghs
  */
 @Configuration
-//@EnableBatchProcessing(modular = true)
 public class BatchConfig extends DefaultBatchConfigurer {
 
 	/**
@@ -38,7 +37,7 @@ public class BatchConfig extends DefaultBatchConfigurer {
 	public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(JobRegistry jobRegistry) throws Exception {
 		JobRegistryBeanPostProcessor beanProcessor = new JobRegistryBeanPostProcessor();
 		beanProcessor.setJobRegistry(jobRegistry);
-		// beanProcessor.afterPropertiesSet();
+		 beanProcessor.afterPropertiesSet();
 		return beanProcessor;
 	}
 }
