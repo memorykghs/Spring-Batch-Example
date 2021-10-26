@@ -9,15 +9,13 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
-import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
-import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +28,7 @@ import com.batch.SpringBatchExmaple.batch.listener.Db001JobListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001ReaderListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001WriterListener;
+import com.batch.SpringBatchExmaple.dto.CarsDto;
 import com.batch.SpringBatchExmaple.entity.Cars;
 import com.batch.SpringBatchExmaple.repository.CarsRepo;
 
@@ -88,16 +87,17 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001Step")
-	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Cars> itemReader, @Qualifier("Db001FileWriter") ItemWriter<Cars> itemWriter,
-			JpaTransactionManager transactionManager) {
+	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Cars> itemReader, @Qualifier("Db001FileWriter") ItemWriter<CarsDto> itemWriter,
+			ItemProcessor<Cars, CarsDto> processor, JpaTransactionManager transactionManager) {
 
 		return stepBuilderFactory.get("Db001Step")
 				.transactionManager(transactionManager)
-				.<Cars, Cars>chunk(FETCH_SIZE)
-				.reader(itemReader)
+				.<Cars, CarsDto>chunk(FETCH_SIZE)
 				.faultTolerant()
 //                .skip(Exception.class)
 //                .skipLimit(Integer.MAX_VALUE)
+				.reader(itemReader)
+				.processor(processor)
 				.writer(itemWriter)
 				.listener(new Db001StepListener())
 				.listener(new Db001ReaderListener())
@@ -111,19 +111,18 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001JpaReader")
-	public RepositoryItemReader<Cars> itemReader() {
+	public RepositoryItemReader<CarsDto> itemReader() {
 
 		Map<String, Direction> sortMap = new HashMap<>();
 		sortMap.put("Manufacturer", Direction.ASC);
 		sortMap.put("Type", Direction.ASC);
 
-		return new RepositoryItemReaderBuilder<Cars>()
+		return new RepositoryItemReaderBuilder<CarsDto>()
 				.name("Db001JpaReader")
 				.pageSize(FETCH_SIZE)
 				.repository(carRepo)
 				.methodName("findAll")
-				// .arguments(args)
-				 .sorts(sortMap) // 必要
+				.sorts(sortMap)
 				.build();
 	}
 

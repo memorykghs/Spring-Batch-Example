@@ -3,7 +3,6 @@ package com.batch.SpringBatchExmaple.config;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +13,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
  * @author memorykghs
  */
 @Configuration
-public class BatchConfig extends DefaultBatchConfigurer {
+public class BatchConfig {
 
 	/**
 	 * 產生 Step Transaction

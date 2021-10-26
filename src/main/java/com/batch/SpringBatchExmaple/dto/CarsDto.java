@@ -1,6 +1,7 @@
 package com.batch.SpringBatchExmaple.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 import lombok.Data;
 
@@ -16,9 +17,7 @@ public class CarsDto implements Serializable {
 	private String manufacturer;
 
 	private String type;
-
-	private String minPrice;
-
-	private String price;
+	
+	private BigDecimal spread;
 
 }
