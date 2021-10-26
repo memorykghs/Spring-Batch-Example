@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
 import com.batch.SpringBatchExample.batch.listener.File001JobListener;
@@ -98,12 +98,11 @@ public class FileReaderJobConfig {
 	 * @return
 	 */
 	@Bean("File001FileReader")
-	public ItemReader<Car> getItemReader(@Value("${inputFilePath}") Resource resource) {
+	public ItemReader<Car> getItemReader(@Value("${filePath}") String filePath) {
 		return new FlatFileItemReaderBuilder<Car>().name("File001FileReader")
 				.encoding("UTF-8")
-				.resource(resource)
-//				 .resource(new FileSystemResource("file:csv/Cars.csv"))
-//				 .resource(new ClassPathResource("\\csv\\Cars.csv"))
+				.resource(new FileSystemResource("D:/cars.csv"))
+//				.resource(new ClassPathResource("csv/Cars.csv"))
 //				.resource(new PathResource("C://Users/user/Desktop/Cars.csv"))
 				.linesToSkip(1)
 //				.delimited()
