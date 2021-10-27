@@ -56,11 +56,10 @@ public class DbReaderJobConfig {
 	private static int FETCH_SIZE = 10;
 	
 	/** Mapper Field */
-    private static final String[] MAPPER_FIELD = new String[] { "Manufacturer", "Type", "MinPrice", "Price" }; // TODO 欄位大小寫有關係?用什麼做mapping?
+    private static final String[] MAPPER_FIELD = new String[] { "Manufacturer", "Type", "Spread" }; // TODO 欄位大小寫有關係?用什麼做mapping?
 
     /** Header */
-    private final String HEADER = new StringBuilder().append("製造商").append(',').append("類別").append(',').append("底價").append(',')
-            .append("售價").toString();
+    private final String HEADER = new StringBuilder().append("製造商").append(',').append("類別").append(',').append("價差").toString();
 
 	/**
 	 * 建立 Job
@@ -135,12 +134,6 @@ public class DbReaderJobConfig {
 
 		String fileName = new SimpleDateFormat("yyyyMMddHHmmssS").format(new Date());
 
-//		 BeanWrapperFieldExtractor<Cars> fieldExtractor = new BeanWrapperFieldExtractor<>();
-//		 fieldExtractor.setNames(MAPPER_FIELD);
-//
-//		 DelimitedLineAggregator<Cars> lineAggreagor = new DelimitedLineAggregator<>();
-//		 lineAggreagor.setFieldExtractor(fieldExtractor);
-
 		return new FlatFileItemWriterBuilder<Cars>().name("Db001FileWriter")
 				.encoding("UTF-8")
 				.resource(new FileSystemResource("D:/" + fileName + ".csv"))
@@ -148,7 +141,6 @@ public class DbReaderJobConfig {
 				.delimited()
 				.names(MAPPER_FIELD)
 //				.shouldDeleteIfEmpty(true) // 當檔案存在且內容為空，restart時會重新生產一份
-//				.lineAggregator(lineAggreagor)
 				.headerCallback(headerCallback -> headerCallback.write(HEADER)) // 使用 headerCallback 寫入表頭
 				.build();
 	}

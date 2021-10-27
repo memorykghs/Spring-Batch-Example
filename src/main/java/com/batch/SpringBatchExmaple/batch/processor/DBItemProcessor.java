@@ -1,6 +1,7 @@
 package com.batch.SpringBatchExmaple.batch.processor;
 
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.stereotype.Component;
 
 import com.batch.SpringBatchExmaple.dto.CarsDto;
 import com.batch.SpringBatchExmaple.entity.Cars;
@@ -10,6 +11,7 @@ import com.batch.SpringBatchExmaple.entity.Cars;
  * 
  * @author memorykghs
  */
+@Component
 public class DBItemProcessor implements ItemProcessor<Cars, CarsDto> {
 
 	@Override
