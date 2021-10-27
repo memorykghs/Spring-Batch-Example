@@ -17,7 +17,7 @@ public class CarsPK implements Serializable {
 
 	@Column(name = "TYPE")
 	private String type;
-	
+
 	public String getManufacturer() {
 		return this.manufacturer;
 	}

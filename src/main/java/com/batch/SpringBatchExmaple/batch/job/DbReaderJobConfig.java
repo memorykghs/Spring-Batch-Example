@@ -16,11 +16,14 @@ import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.item.support.SynchronizedItemStreamWriter;
+import org.springframework.batch.item.support.builder.SynchronizedItemStreamWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
@@ -53,7 +56,7 @@ public class DbReaderJobConfig {
 	private CarsRepo carRepo;
 
 	/** 每批件數 */
-	private static int FETCH_SIZE = 10;
+	private static int FETCH_SIZE = 5;
 	
 	/** Mapper Field */
     private static final String[] MAPPER_FIELD = new String[] { "Manufacturer", "Type", "Spread" }; // TODO 欄位大小寫有關係?用什麼做mapping?
@@ -70,7 +73,7 @@ public class DbReaderJobConfig {
 	@Bean
 	public Job dbReaderJob(@Qualifier("Db001Step") Step step) {
 		return jobBuilderFactory.get("Db001Job")
-//				.preventRestart()
+				.preventRestart()
 				.start(step)
 //				.incrementer(new RunIdIncrementer())
 				.listener(new Db001JobListener())
@@ -86,8 +89,10 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001Step")
-	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Cars> itemReader, @Qualifier("Db001FileWriter") ItemWriter<CarsDto> itemWriter,
-			ItemProcessor<Cars, CarsDto> processor, JpaTransactionManager transactionManager) {
+//	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Cars> itemReader, @Qualifier("Db001FileWriter") ItemWriter<CarsDto> itemWriter,
+//			ItemProcessor<Cars, CarsDto> processor, JpaTransactionManager transactionManager) {
+		public Step dbReaderStep(ItemReader<Cars> itemReader, SynchronizedItemStreamWriter<CarsDto> itemWriter,
+				ItemProcessor<Cars, CarsDto> processor, JpaTransactionManager transactionManager) {
 
 		return stepBuilderFactory.get("Db001Step")
 				.transactionManager(transactionManager)
@@ -98,6 +103,9 @@ public class DbReaderJobConfig {
 				.reader(itemReader)
 				.processor(processor)
 				.writer(itemWriter)
+				.taskExecutor(new SimpleAsyncTaskExecutor())
+				.throttleLimit(5)
+//				.taskExecutor(new SimpleAsyncTaskExecutor(threadFactory))
 				.listener(new Db001StepListener())
 				.listener(new Db001ReaderListener())
 				.listener(new Db001WriterListener())
@@ -110,13 +118,13 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001JpaReader")
-	public RepositoryItemReader<CarsDto> itemReader() {
+	public RepositoryItemReader<Cars> itemReader() {
 
 		Map<String, Direction> sortMap = new HashMap<>();
 		sortMap.put("Manufacturer", Direction.ASC);
-		sortMap.put("Type", Direction.ASC);
+//		sortMap.put("Type", Direction.ASC);
 
-		return new RepositoryItemReaderBuilder<CarsDto>()
+		return new RepositoryItemReaderBuilder<Cars>()
 				.name("Db001JpaReader")
 				.pageSize(FETCH_SIZE)
 				.repository(carRepo)
@@ -130,11 +138,11 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001FileWriter")
-	public FlatFileItemWriter<Cars> customFlatFileWriter() {
+	public FlatFileItemWriter<CarsDto> customFlatFileWriter() {
 
 		String fileName = new SimpleDateFormat("yyyyMMddHHmmssS").format(new Date());
 
-		return new FlatFileItemWriterBuilder<Cars>().name("Db001FileWriter")
+		return new FlatFileItemWriterBuilder<CarsDto>().name("Db001FileWriter")
 				.encoding("UTF-8")
 				.resource(new FileSystemResource("D:/" + fileName + ".csv"))
 				.append(true) // 是否串接在同一個檔案後
@@ -143,5 +151,13 @@ public class DbReaderJobConfig {
 //				.shouldDeleteIfEmpty(true) // 當檔案存在且內容為空，restart時會重新生產一份
 				.headerCallback(headerCallback -> headerCallback.write(HEADER)) // 使用 headerCallback 寫入表頭
 				.build();
+	}
+	
+	@Bean("SynchronizedWriter")
+	public SynchronizedItemStreamWriter<CarsDto> getSynchronizedItemStreamWriter(FlatFileItemWriter<CarsDto> itemWriter){
+		return new SynchronizedItemStreamWriterBuilder<CarsDto>()
+				.delegate(itemWriter)
+				.build();
+				
 	}
 }
