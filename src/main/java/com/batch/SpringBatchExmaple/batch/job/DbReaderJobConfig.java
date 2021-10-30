@@ -28,6 +28,7 @@ import com.batch.SpringBatchExmaple.batch.listener.Db001JobListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001ReaderListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001WriterListener;
+import com.batch.SpringBatchExmaple.batch.skipPolicy.CustomSkipPolicy;
 import com.batch.SpringBatchExmaple.dto.CarsDto;
 import com.batch.SpringBatchExmaple.entity.Cars;
 import com.batch.SpringBatchExmaple.repository.CarsRepo;
@@ -95,6 +96,7 @@ public class DbReaderJobConfig {
 				.faultTolerant()
 //                .skip(Exception.class)
 //                .skipLimit(Integer.MAX_VALUE)
+				.skipPolicy(new CustomSkipPolicy())
 				.reader(itemReader)
 				.processor(processor)
 				.writer(itemWriter)
