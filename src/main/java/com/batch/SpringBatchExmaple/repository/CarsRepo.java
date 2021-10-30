@@ -9,7 +9,4 @@ import com.batch.SpringBatchExmaple.entity.CarsPK;
 @Repository
 public interface CarsRepo extends JpaRepository<Cars, CarsPK> {
 
-    /** 查詢全部，依PK欄位排序 */
-//    Page<Car> findAll(Pageable pageable);
-
 }
