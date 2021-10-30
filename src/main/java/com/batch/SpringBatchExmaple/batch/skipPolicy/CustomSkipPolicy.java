@@ -19,17 +19,16 @@ public class CustomSkipPolicy implements SkipPolicy {
 	@Override
 	public boolean shouldSkip(Throwable t, int skipCount) throws SkipLimitExceededException {
 
-		// 可以跳過 RangeLimitExcpetion
-		if (t instanceof RangeLimitExcpetion && skipCount < MAX_SKIP_COUNT) {
+		// 可以跳過 DataNotFoundException
+		if (t instanceof DataNotFoundException && skipCount < MAX_SKIP_COUNT) {
 			return true;
 		}
 
-		// DataNotFoundException 不可被跳過
-		if (t instanceof DataNotFoundException && skipCount < MAX_SKIP_COUNT) {
+		// RangeLimitExcpetion 不可被跳過
+		if (t instanceof RangeLimitExcpetion && skipCount < MAX_SKIP_COUNT) {
 			return false;
 		}
 
 		return false;
 	}
-
 }
