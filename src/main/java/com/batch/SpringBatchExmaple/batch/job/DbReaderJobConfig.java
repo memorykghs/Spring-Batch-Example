@@ -5,8 +5,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.AfterStep;
+import org.springframework.batch.core.annotation.BeforeStep;
+import org.springframework.batch.core.annotation.OnSkipInProcess;
+import org.springframework.batch.core.annotation.OnSkipInRead;
+import org.springframework.batch.core.annotation.OnSkipInWrite;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -26,7 +35,6 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 
 import com.batch.SpringBatchExmaple.batch.listener.Db001JobListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001ReaderListener;
-import com.batch.SpringBatchExmaple.batch.listener.Db001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001WriterListener;
 import com.batch.SpringBatchExmaple.dto.CarsDto;
 import com.batch.SpringBatchExmaple.entity.Cars;
@@ -98,9 +106,50 @@ public class DbReaderJobConfig {
 				.reader(itemReader)
 				.processor(processor)
 				.writer(itemWriter)
-				.listener(new Db001StepListener())
+				.listener(new Object() {
+					private final Logger LOGGER = LoggerFactory.getLogger(DbReaderJobConfig.class);
+					
+					@OnSkipInRead
+					public void onSkipInRead(Throwable t) {
+						LOGGER.error("Skip read message: {}", t.getMessage());
+
+					}
+
+					@OnSkipInWrite
+					public void onSkipInWrite(CarsDto item, Throwable t) {
+						LOGGER.info("Skip item: {}", item.getManufacturer(), item.getType());
+						LOGGER.error("Skip write message: {}", t.getMessage());
+
+					}
+
+					@OnSkipInProcess
+					public void onSkipInProcess(Cars item, Throwable t) {
+						LOGGER.error("Skip on process message: {}", item.getManufacturer(), item.getType());
+					}
+					
+					@BeforeStep
+					public void beforeStep(StepExecution stepExecution) {
+						LOGGER.info("開始讀檔");
+					};
+					
+					
+					@AfterStep
+					public ExitStatus afterStep(StepExecution stepExecution) {
+						String msg = new StringBuilder()
+				                .append("Db001Step: 讀取DB Table筆數: ")
+				                .append(stepExecution.getReadCount())
+				                .append(", 成功筆數: ")
+				                .append(stepExecution.getWriteCount())
+				                .append(", 失敗筆數: ")
+				                .append(stepExecution.getSkipCount()).toString();
+				        LOGGER.info(msg);
+				        return ExitStatus.COMPLETED;
+					};
+				})
 				.listener(new Db001ReaderListener())
 				.listener(new Db001WriterListener())
+				// .listener(new Db001SkipListener())
+				// .allowStartIfComplete(true) // 當其他 Step 失敗時允許此狀態為成功的 Step 重啟
 				.build();
 	}
 
