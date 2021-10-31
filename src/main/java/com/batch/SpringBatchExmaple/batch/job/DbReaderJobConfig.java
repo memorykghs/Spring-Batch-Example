@@ -28,6 +28,7 @@ import com.batch.SpringBatchExmaple.batch.listener.Db001JobListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001ReaderListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001WriterListener;
+import com.batch.SpringBatchExmaple.batch.tasklet.ClearLogTasklet;
 import com.batch.SpringBatchExmaple.dto.CarsDto;
 import com.batch.SpringBatchExmaple.entity.Cars;
 import com.batch.SpringBatchExmaple.repository.CarsRepo;
@@ -68,12 +69,20 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean
-	public Job dbReaderJob(@Qualifier("Db001Step") Step step) {
+//	public Job dbReaderJob(@Qualifier("Db001Step") Step step) {
+	public Job dbReaderJob(@Qualifier("clearLogStep") Step step) {
 		return jobBuilderFactory.get("Db001Job")
-//				.preventRestart()
 				.start(step)
-//				.incrementer(new RunIdIncrementer())
 				.listener(new Db001JobListener())
+				.build();
+	}
+	
+	@Bean("clearLogStep")
+	public Step clearLogStep(JpaTransactionManager transactionManager) {
+
+		return stepBuilderFactory.get("Db001Step")
+				.transactionManager(transactionManager)
+				.tasklet(new ClearLogTasklet())
 				.build();
 	}
 
