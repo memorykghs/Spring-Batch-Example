@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
 import com.batch.SpringBatchExmaple.batch.listener.Db001JobListener;
@@ -51,6 +52,10 @@ public class DbReaderJobConfig {
 	/** CarRepo */
 	@Autowired
 	private CarsRepo carRepo;
+	
+	/** 發送 email */
+	@Autowired
+	private JavaMailSender mailSender;
 
 	/** 每批件數 */
 	private static int FETCH_SIZE = 10;
@@ -70,9 +75,8 @@ public class DbReaderJobConfig {
 	@Bean
 	public Job dbReaderJob(@Qualifier("Db001Step") Step step) {
 		return jobBuilderFactory.get("Db001Job")
-//				.preventRestart()
+				.preventRestart()
 				.start(step)
-//				.incrementer(new RunIdIncrementer())
 				.listener(new Db001JobListener())
 				.build();
 	}
@@ -93,8 +97,8 @@ public class DbReaderJobConfig {
 				.transactionManager(transactionManager)
 				.<Cars, CarsDto>chunk(FETCH_SIZE)
 				.faultTolerant()
-//                .skip(Exception.class)
-//                .skipLimit(Integer.MAX_VALUE)
+//				.skip(Exception.class)
+//				.skipLimit(Integer.MAX_VALUE)
 				.reader(itemReader)
 				.processor(processor)
 				.writer(itemWriter)
@@ -140,8 +144,26 @@ public class DbReaderJobConfig {
 				.append(true) // 是否串接在同一個檔案後
 				.delimited()
 				.names(MAPPER_FIELD)
-//				.shouldDeleteIfEmpty(true) // 當檔案存在且內容為空，restart時會重新生產一份
 				.headerCallback(headerCallback -> headerCallback.write(HEADER)) // 使用 headerCallback 寫入表頭
+				.build();
+	}
+	
+	@Bean("sendEmailStep")
+	public Step sendEmailStep(@Qualifier("Db001JpaReader") ItemReader<Cars> itemReader, @Qualifier("Db001FileWriter") ItemWriter<CarsDto> itemWriter,
+			ItemProcessor<Cars, CarsDto> processor, JpaTransactionManager transactionManager) {
+
+		return stepBuilderFactory.get("Db001Step")
+				.transactionManager(transactionManager)
+				.<Cars, CarsDto>chunk(FETCH_SIZE)
+				.faultTolerant()
+//				.skip(Exception.class)
+//				.skipLimit(Integer.MAX_VALUE)
+				.reader(itemReader)
+				.processor(processor)
+				.writer(itemWriter)
+				.listener(new Db001StepListener())
+				.listener(new Db001ReaderListener())
+				.listener(new Db001WriterListener())
 				.build();
 	}
 }
