@@ -32,7 +32,7 @@ public class SpringBatchExmapleApplication {
 //			String jobName = args[0];
 			String jobName = "Db001Job";
 
-			SpringApplication.run(SpringBatchExmapleApplication.class, args);
+//			SpringApplication.run(SpringBatchExmapleApplication.class, args);
 			ConfigurableApplicationContext context = SpringApplication.run(SpringBatchExmapleApplication.class, args);
 			Job job = context.getBean(JobRegistry.class).getJob(jobName);
 			context.getBean(JobLauncher.class).run(job, createJobParams());

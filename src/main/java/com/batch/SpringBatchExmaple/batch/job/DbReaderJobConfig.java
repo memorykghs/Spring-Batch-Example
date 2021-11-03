@@ -7,8 +7,11 @@ import java.util.Map;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -16,12 +19,14 @@ import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
@@ -55,7 +60,7 @@ public class DbReaderJobConfig {
 	
 	/** 發送 email */
 	@Autowired
-	private JavaMailSender mailSender;
+	private  JavaMailSender mailSender;
 
 	/** 每批件數 */
 	private static int FETCH_SIZE = 10;
@@ -77,6 +82,9 @@ public class DbReaderJobConfig {
 		return jobBuilderFactory.get("Db001Job")
 				.preventRestart()
 				.start(step)
+				.on("COMPLETED").to(sendSuccessEmailStep()) // 源頭是 Reader Step，成功發送信件
+				.from(step).on("FAILED").to(sendFailEmailStep()) // 源頭也是 Reader Step，失敗也發送信件
+				.end() // 表示 Step flow 結束
 				.listener(new Db001JobListener())
 				.build();
 	}
@@ -114,13 +122,13 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001JpaReader")
-	public RepositoryItemReader<CarsDto> itemReader() {
+	public RepositoryItemReader<Cars> itemReader() {
 
 		Map<String, Direction> sortMap = new HashMap<>();
 		sortMap.put("Manufacturer", Direction.ASC);
 		sortMap.put("Type", Direction.ASC);
 
-		return new RepositoryItemReaderBuilder<CarsDto>()
+		return new RepositoryItemReaderBuilder<Cars>()
 				.name("Db001JpaReader")
 				.pageSize(FETCH_SIZE)
 				.repository(carRepo)
@@ -134,36 +142,81 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001FileWriter")
-	public FlatFileItemWriter<Cars> customFlatFileWriter() {
+	public FlatFileItemWriter<CarsDto> customFlatFileWriter() {
 
 		String fileName = new SimpleDateFormat("yyyyMMddHHmmssS").format(new Date());
 
-		return new FlatFileItemWriterBuilder<Cars>().name("Db001FileWriter")
+		return new FlatFileItemWriterBuilder<CarsDto>().name("Db001FileWriter")
 				.encoding("UTF-8")
 				.resource(new FileSystemResource("D:/" + fileName + ".csv"))
-				.append(true) // 是否串接在同一個檔案後
+				.append(true)
 				.delimited()
 				.names(MAPPER_FIELD)
-				.headerCallback(headerCallback -> headerCallback.write(HEADER)) // 使用 headerCallback 寫入表頭
+				.headerCallback(headerCallback -> headerCallback.write(HEADER))
 				.build();
 	}
 	
-	@Bean("sendEmailStep")
-	public Step sendEmailStep(@Qualifier("Db001JpaReader") ItemReader<Cars> itemReader, @Qualifier("Db001FileWriter") ItemWriter<CarsDto> itemWriter,
-			ItemProcessor<Cars, CarsDto> processor, JpaTransactionManager transactionManager) {
+	/**
+	 * 建立發送 success mail Step
+	 * @param itemReader
+	 * @param itemWriter
+	 * @param processor
+	 * @param transactionManager
+	 * @return
+	 */
+	@Bean
+	public Step sendSuccessEmailStep() {
 
 		return stepBuilderFactory.get("Db001Step")
-				.transactionManager(transactionManager)
-				.<Cars, CarsDto>chunk(FETCH_SIZE)
-				.faultTolerant()
-//				.skip(Exception.class)
-//				.skipLimit(Integer.MAX_VALUE)
-				.reader(itemReader)
-				.processor(processor)
-				.writer(itemWriter)
-				.listener(new Db001StepListener())
-				.listener(new Db001ReaderListener())
-				.listener(new Db001WriterListener())
+				.tasklet(new Tasklet() {
+					
+					@Override
+					public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext)
+							throws Exception {
+
+						SimpleMailMessage mailMsg = new SimpleMailMessage();
+						mailMsg.setFrom("memorykghs@gmail.com");
+						mailMsg.setTo("memorykghs.iem01@nctu.edu.tw");
+						mailMsg.setSubject("Spring Batch 執行成功通知");
+						mailMsg.setText("成功啦!成功啦!!成功啦!!!");
+
+						mailSender.send(mailMsg);
+
+						return RepeatStatus.FINISHED;
+					}
+				})
+				.build();
+	}
+	
+	/**
+	 * 建立發送 fail mail Step
+	 * @param itemReader
+	 * @param itemWriter
+	 * @param processor
+	 * @param transactionManager
+	 * @return
+	 */
+	@Bean
+	public Step sendFailEmailStep() {
+
+		return stepBuilderFactory.get("Db001Step")
+				.tasklet(new Tasklet() {
+					
+					@Override
+					public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext)
+							throws Exception {
+
+						SimpleMailMessage mailMsg = new SimpleMailMessage();
+						mailMsg.setFrom("memorykghs@gmail.com");
+						mailMsg.setTo("memorykghs@gmail.com");
+						mailMsg.setSubject("Spring Batch 執行失敗通知");
+						mailMsg.setText("批次執行失敗通知測試");
+
+						mailSender.send(mailMsg);
+
+						return RepeatStatus.FINISHED;
+					}
+				})
 				.build();
 	}
 }
