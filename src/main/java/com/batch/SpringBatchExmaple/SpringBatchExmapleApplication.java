@@ -32,10 +32,9 @@ public class SpringBatchExmapleApplication {
 //			String jobName = args[0];
 			String jobName = "Db001Job";
 
-			SpringApplication.run(SpringBatchExmapleApplication.class, args);
 			ConfigurableApplicationContext context = SpringApplication.run(SpringBatchExmapleApplication.class, args);
 			Job job = context.getBean(JobRegistry.class).getJob(jobName);
-			context.getBean(JobLauncher.class).run(job, createJobParams());
+			context.getBean(JobLauncher.class).run(job, createJobParams(args));
 
 		} catch (Exception e) {
 			LOGGER.error("springBatchPractice執行失敗", e);
@@ -46,10 +45,14 @@ public class SpringBatchExmapleApplication {
 	 * 產生JobParameter
 	 * @return
 	 */
-	private static JobParameters createJobParams() {
+	private static JobParameters createJobParams(String[] args) {
 
 		JobParametersBuilder builder = new JobParametersBuilder();
 		builder.addDate("executeTime", Timestamp.valueOf(LocalDateTime.now()));
+		
+		if(args.length > 1) {
+			builder.addString("clsMonth", args[1]);
+		}
 
 		return builder.toJobParameters();
 	}
