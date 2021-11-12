@@ -30,6 +30,8 @@ import com.batch.SpringBatchExmaple.batch.listener.Db001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001WriterListener;
 import com.batch.SpringBatchExmaple.dto.CarsDto;
 import com.batch.SpringBatchExmaple.entity.Cars;
+import com.batch.SpringBatchExmaple.exception.DataNotFoundException;
+import com.batch.SpringBatchExmaple.exception.ErrorInputException;
 import com.batch.SpringBatchExmaple.repository.CarsRepo;
 
 /**
@@ -93,8 +95,10 @@ public class DbReaderJobConfig {
 				.transactionManager(transactionManager)
 				.<Cars, CarsDto>chunk(FETCH_SIZE)
 				.faultTolerant()
-//                .skip(Exception.class)
-//                .skipLimit(Integer.MAX_VALUE)
+                .skip(Exception.class)
+                .skipLimit(Integer.MAX_VALUE)
+				.retry(ErrorInputException.class)
+				.retry(DataNotFoundException.class)
 				.reader(itemReader)
 				.processor(processor)
 				.writer(itemWriter)

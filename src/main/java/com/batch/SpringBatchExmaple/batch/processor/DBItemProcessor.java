@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.batch.SpringBatchExmaple.dto.CarsDto;
 import com.batch.SpringBatchExmaple.entity.Cars;
+import com.batch.SpringBatchExmaple.exception.ErrorInputException;
 
 /**
  * Item Processor
@@ -22,8 +23,10 @@ public class DBItemProcessor implements ItemProcessor<Cars, CarsDto> {
 		carsDto.setManufacturer(item.getManufacturer());
 		carsDto.setType(item.getType());
 		carsDto.setSpread(item.getPrice().subtract(item.getMinPrice()));
+		
+		throw new ErrorInputException();
 
-		return carsDto;
+		// return carsDto;
 	}
 
 }
