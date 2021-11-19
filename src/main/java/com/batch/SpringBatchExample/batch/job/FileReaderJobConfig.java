@@ -103,7 +103,6 @@ public class FileReaderJobConfig {
 				.encoding("UTF-8")
 				.resource(new FileSystemResource("D:/Cars.csv"))
 //				.resource(new ClassPathResource("csv/Cars.csv"))
-//				.resource(new PathResource("C://Users/user/Desktop/Cars.csv"))
 				.linesToSkip(1)
 //				.delimited()
 //				.names(MAPPER_FIELD)
