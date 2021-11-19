@@ -101,7 +101,7 @@ public class FileReaderJobConfig {
 	public ItemReader<Car> getItemReader(@Value("${filePath}") String filePath) {
 		return new FlatFileItemReaderBuilder<Car>().name("File001FileReader")
 				.encoding("UTF-8")
-				.resource(new FileSystemResource("D:/cars.csv"))
+				.resource(new FileSystemResource("D:/Cars.csv"))
 //				.resource(new ClassPathResource("csv/Cars.csv"))
 //				.resource(new PathResource("C://Users/user/Desktop/Cars.csv"))
 				.linesToSkip(1)
