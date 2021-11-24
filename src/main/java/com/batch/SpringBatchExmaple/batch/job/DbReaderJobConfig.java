@@ -16,8 +16,6 @@ import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
-import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
-import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -72,9 +70,8 @@ public class DbReaderJobConfig {
 	@Bean
 	public Job dbReaderJob(@Qualifier("Db001Step") Step step) {
 		return jobBuilderFactory.get("Db001Job")
-//				.preventRestart()
+				.incrementer(new RunIdIncrementer())
 				.start(step)
-//				.incrementer(new RunIdIncrementer())
 				.listener(new Db001JobListener())
 				.build();
 	}
@@ -136,20 +133,12 @@ public class DbReaderJobConfig {
 
 		String fileName = new SimpleDateFormat("yyyyMMddHHmmssS").format(new Date());
 
-//		 BeanWrapperFieldExtractor<Cars> fieldExtractor = new BeanWrapperFieldExtractor<>();
-//		 fieldExtractor.setNames(MAPPER_FIELD);
-//
-//		 DelimitedLineAggregator<Cars> lineAggreagor = new DelimitedLineAggregator<>();
-//		 lineAggreagor.setFieldExtractor(fieldExtractor);
-
 		return new FlatFileItemWriterBuilder<Cars>().name("Db001FileWriter")
 				.encoding("UTF-8")
 				.resource(new FileSystemResource("D:/" + fileName + ".csv"))
 				.append(true) // 是否串接在同一個檔案後
 				.delimited()
 				.names(MAPPER_FIELD)
-//				.shouldDeleteIfEmpty(true) // 當檔案存在且內容為空，restart時會重新生產一份
-//				.lineAggregator(lineAggreagor)
 				.headerCallback(headerCallback -> headerCallback.write(HEADER)) // 使用 headerCallback 寫入表頭
 				.build();
 	}
