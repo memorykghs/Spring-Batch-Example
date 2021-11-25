@@ -4,13 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ItemReadListener;
 
-import com.batch.SpringBatchExmaple.dto.CarsDto;
+import com.batch.SpringBatchExmaple.dto.CarDto;
 
 /**
  * Db001 ReaderListener
  * @author memeorykghs
  */
-public class Db001ReaderListener implements ItemReadListener<CarsDto> {
+public class Db001ReaderListener implements ItemReadListener<CarDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Db001ReaderListener.class);
 
@@ -21,7 +21,7 @@ public class Db001ReaderListener implements ItemReadListener<CarsDto> {
     }
 
     @Override
-    public void afterRead(CarsDto item) {
+    public void afterRead(CarDto item) {
     	System.out.println("==========> " + item.getManufacturer());
 
     }

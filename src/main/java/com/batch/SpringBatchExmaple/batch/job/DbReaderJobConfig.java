@@ -30,8 +30,8 @@ import com.batch.SpringBatchExmaple.batch.listener.Db001JobListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001ReaderListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001WriterListener;
-import com.batch.SpringBatchExmaple.entity.Cars;
-import com.batch.SpringBatchExmaple.repository.CarsRepo;
+import com.batch.SpringBatchExmaple.entity.Car;
+import com.batch.SpringBatchExmaple.repository.CarRepo;
 
 /**
  * DB -> File
@@ -51,7 +51,7 @@ public class DbReaderJobConfig {
 
 	/** CarRepo */
 	@Autowired
-	private CarsRepo carRepo;
+	private CarRepo carRepo;
 
 	/** 每批件數 */
 	private static int FETCH_SIZE = 10;
@@ -88,12 +88,12 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001Step")
-	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Cars> itemReader, @Qualifier("Db001FileWriter") ItemWriter<Cars> itemWriter,
+	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Car> itemReader, @Qualifier("Db001FileWriter") ItemWriter<Car> itemWriter,
 			JpaTransactionManager transactionManager) {
 
 		return stepBuilderFactory.get("Db001Step")
 				.transactionManager(transactionManager)
-				.<Cars, Cars>chunk(FETCH_SIZE)
+				.<Car, Car>chunk(FETCH_SIZE)
 				.reader(itemReader)
 				.faultTolerant()
 //                .skip(Exception.class)
@@ -111,13 +111,13 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001JpaReader")
-	public RepositoryItemReader<Cars> itemReader() {
+	public RepositoryItemReader<Car> itemReader() {
 
 		Map<String, Direction> sortMap = new HashMap<>();
 		sortMap.put("Manufacturer", Direction.ASC);
 		sortMap.put("Type", Direction.ASC);
 
-		return new RepositoryItemReaderBuilder<Cars>()
+		return new RepositoryItemReaderBuilder<Car>()
 				.name("Db001JpaReader")
 				.pageSize(FETCH_SIZE)
 				.repository(carRepo)
@@ -132,7 +132,7 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001FileWriter")
-	public FlatFileItemWriter<Cars> customFlatFileWriter() {
+	public FlatFileItemWriter<Car> customFlatFileWriter() {
 
 		String fileName = new SimpleDateFormat("yyyyMMddHHmmssS").format(new Date());
 
@@ -142,7 +142,7 @@ public class DbReaderJobConfig {
 //		 DelimitedLineAggregator<Cars> lineAggreagor = new DelimitedLineAggregator<>();
 //		 lineAggreagor.setFieldExtractor(fieldExtractor);
 
-		return new FlatFileItemWriterBuilder<Cars>().name("Db001FileWriter")
+		return new FlatFileItemWriterBuilder<Car>().name("Db001FileWriter")
 				.encoding("UTF-8")
 				.resource(new FileSystemResource("D:/" + fileName + ".csv"))
 				.append(true) // 是否串接在同一個檔案後

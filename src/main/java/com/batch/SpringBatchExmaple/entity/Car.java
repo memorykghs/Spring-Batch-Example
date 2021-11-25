@@ -13,9 +13,9 @@ import lombok.Data;
 
 @Entity
 @Table(name = "CARS")
-@IdClass(value = CarsPK.class)
+@IdClass(value = CarPK.class)
 @Data
-public class Cars implements Serializable {
+public class Car implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
