@@ -100,7 +100,7 @@ public class DbReaderJobConfig {
 				.writer(itemWriter)
 				.listener(new Db001StepListener())
 				.listener(new Db001ReaderListener())
-			        .listener(new Db001ProcessorListener()) // 加入
+				.listener(new Db001ProcessorListener()) // 加入
 				.listener(new Db001WriterListener())
 				.build();
 	}
