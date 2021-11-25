@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Embeddable
 @Data
-public class CarsPK implements Serializable {
+public class CarPK implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Column(name = "MANUFACTURER")

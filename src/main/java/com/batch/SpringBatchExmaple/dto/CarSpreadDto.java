@@ -10,7 +10,7 @@ import lombok.Data;
  * @author memorykghs
  */
 @Data
-public class CarsDto implements Serializable {
+public class CarSpreadDto implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

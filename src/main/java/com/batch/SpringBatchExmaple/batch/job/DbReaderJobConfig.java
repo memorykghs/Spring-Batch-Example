@@ -28,9 +28,9 @@ import com.batch.SpringBatchExmaple.batch.listener.Db001JobListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001ReaderListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001StepListener;
 import com.batch.SpringBatchExmaple.batch.listener.Db001WriterListener;
-import com.batch.SpringBatchExmaple.dto.CarsDto;
-import com.batch.SpringBatchExmaple.entity.Cars;
-import com.batch.SpringBatchExmaple.repository.CarsRepo;
+import com.batch.SpringBatchExmaple.dto.CarSpreadDto;
+import com.batch.SpringBatchExmaple.entity.Car;
+import com.batch.SpringBatchExmaple.repository.CarRepo;
 
 /**
  * DB -> File
@@ -50,7 +50,7 @@ public class DbReaderJobConfig {
 
 	/** CarRepo */
 	@Autowired
-	private CarsRepo carRepo;
+	private CarRepo carRepo;
 
 	/** 每批件數 */
 	private static int FETCH_SIZE = 10;
@@ -72,7 +72,6 @@ public class DbReaderJobConfig {
 		return jobBuilderFactory.get("Db001Job")
 //				.preventRestart()
 				.start(step)
-//				.incrementer(new RunIdIncrementer())
 				.listener(new Db001JobListener())
 				.build();
 	}
@@ -86,15 +85,15 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001Step")
-	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Cars> itemReader, @Qualifier("Db001FileWriter") ItemWriter<CarsDto> itemWriter,
-			ItemProcessor<Cars, CarsDto> processor, JpaTransactionManager transactionManager) {
+	public Step dbReaderStep(@Qualifier("Db001JpaReader") ItemReader<Car> itemReader, @Qualifier("Db001FileWriter") ItemWriter<CarSpreadDto> itemWriter,
+			ItemProcessor<Car, CarSpreadDto> processor, JpaTransactionManager transactionManager) {
 
 		return stepBuilderFactory.get("Db001Step")
 				.transactionManager(transactionManager)
-				.<Cars, CarsDto>chunk(FETCH_SIZE)
+				.<Car, CarSpreadDto>chunk(FETCH_SIZE)
 				.faultTolerant()
-//                .skip(Exception.class)
-//                .skipLimit(Integer.MAX_VALUE)
+                .skip(Exception.class)
+                .skipLimit(Integer.MAX_VALUE)
 				.reader(itemReader)
 				.processor(processor)
 				.writer(itemWriter)
@@ -110,13 +109,13 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001JpaReader")
-	public RepositoryItemReader<CarsDto> itemReader() {
+	public RepositoryItemReader<CarSpreadDto> itemReader() {
 
 		Map<String, Direction> sortMap = new HashMap<>();
 		sortMap.put("Manufacturer", Direction.ASC);
 		sortMap.put("Type", Direction.ASC);
 
-		return new RepositoryItemReaderBuilder<CarsDto>()
+		return new RepositoryItemReaderBuilder<CarSpreadDto>()
 				.name("Db001JpaReader")
 				.pageSize(FETCH_SIZE)
 				.repository(carRepo)
@@ -130,11 +129,11 @@ public class DbReaderJobConfig {
 	 * @return
 	 */
 	@Bean("Db001FileWriter")
-	public FlatFileItemWriter<Cars> customFlatFileWriter() {
+	public FlatFileItemWriter<Car> customFlatFileWriter() {
 
 		String fileName = new SimpleDateFormat("yyyyMMddHHmmssS").format(new Date());
 
-		return new FlatFileItemWriterBuilder<Cars>().name("Db001FileWriter")
+		return new FlatFileItemWriterBuilder<Car>().name("Db001FileWriter")
 				.encoding("UTF-8")
 				.resource(new FileSystemResource("D:/" + fileName + ".csv"))
 				.append(true) // 是否串接在同一個檔案後

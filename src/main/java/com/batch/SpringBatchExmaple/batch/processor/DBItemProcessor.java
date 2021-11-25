@@ -3,8 +3,8 @@ package com.batch.SpringBatchExmaple.batch.processor;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
-import com.batch.SpringBatchExmaple.dto.CarsDto;
-import com.batch.SpringBatchExmaple.entity.Cars;
+import com.batch.SpringBatchExmaple.dto.CarSpreadDto;
+import com.batch.SpringBatchExmaple.entity.Car;
 
 /**
  * Item Processor
@@ -12,13 +12,13 @@ import com.batch.SpringBatchExmaple.entity.Cars;
  * @author memorykghs
  */
 @Component
-public class DBItemProcessor implements ItemProcessor<Cars, CarsDto> {
+public class DBItemProcessor implements ItemProcessor<Car, CarSpreadDto> {
 
 	@Override
-	public CarsDto process(Cars item) throws Exception {
+	public CarSpreadDto process(Car item) throws Exception {
 
 		// 計算每一廠牌汽車底價及售價價差
-		CarsDto carsDto = new CarsDto();
+		CarSpreadDto carsDto = new CarSpreadDto();
 		carsDto.setManufacturer(item.getManufacturer());
 		carsDto.setType(item.getType());
 		carsDto.setSpread(item.getPrice().subtract(item.getMinPrice()));
