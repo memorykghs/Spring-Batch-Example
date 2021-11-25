@@ -14,7 +14,7 @@ import com.batch.SpringBatchExmaple.batch.listener.Db001JobListener;
 import com.batch.SpringBatchExmaple.batch.tasklet.ClearLogTasklet;
 
 /**
- * DB -> File
+ * 清除 Log 批次設定
  * 
  * @author memorykghs
  */
