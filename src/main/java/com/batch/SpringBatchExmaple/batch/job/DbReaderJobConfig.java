@@ -31,6 +31,7 @@ import com.batch.SpringBatchExmaple.batch.listener.Db001WriterListener;
 import com.batch.SpringBatchExmaple.dto.CarSpreadDto;
 import com.batch.SpringBatchExmaple.entity.Car;
 import com.batch.SpringBatchExmaple.repository.CarRepo;
+import com.batch.SpringBatchExmaple.batch.listener.Db001ProcessorListener;
 
 /**
  * DB -> File
@@ -99,6 +100,7 @@ public class DbReaderJobConfig {
 				.writer(itemWriter)
 				.listener(new Db001StepListener())
 				.listener(new Db001ReaderListener())
+			        .listener(new Db001ProcessorListener()) // 加入
 				.listener(new Db001WriterListener())
 				.build();
 	}
