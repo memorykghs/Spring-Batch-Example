@@ -189,7 +189,6 @@ public class DbReaderJobConfig {
 				.append(true) // 是否串接在同一個檔案後
 				.delimited()
 				.names(MAPPER_FIELD)
-//				.shouldDeleteIfEmpty(true) // 當檔案存在且內容為空，restart時會重新生產一份
 				.headerCallback(headerCallback -> headerCallback.write(HEADER)) // 使用 headerCallback 寫入表頭
 				.build();
 	}
