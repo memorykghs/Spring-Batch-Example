@@ -97,6 +97,7 @@ public class DbReaderJobConfig {
 				.skipLimit(Integer.MAX_VALUE)
 				.retry(ErrorInputException.class)
 				.retry(DataNotFoundException.class)
+				.retryLimit(1)
 				.reader(itemReader)
 				.processor(processor)
 				.writer(itemWriter)
