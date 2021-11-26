@@ -72,9 +72,7 @@ public class DbReaderJobConfig {
 	@Bean
 	public Job dbReaderJob(@Qualifier("Db001Step") Step step) {
 		return jobBuilderFactory.get("Db001Job")
-//				.preventRestart()
 				.start(step)
-//				.incrementer(new RunIdIncrementer())
 				.listener(new Db001JobListener())
 				.build();
 	}
@@ -95,8 +93,8 @@ public class DbReaderJobConfig {
 				.transactionManager(transactionManager)
 				.<Cars, CarsDto>chunk(FETCH_SIZE)
 				.faultTolerant()
-                .skip(Exception.class)
-                .skipLimit(Integer.MAX_VALUE)
+				.skip(Exception.class)
+				.skipLimit(Integer.MAX_VALUE)
 				.retry(ErrorInputException.class)
 				.retry(DataNotFoundException.class)
 				.reader(itemReader)
