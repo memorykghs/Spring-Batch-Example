@@ -44,11 +44,10 @@ public class DbReaderJobConfig {
 	}
 	
 	@Bean("clearLogStep")
-	public Step clearLogStep(JpaTransactionManager transactionManager) {
+	public Step clearLogStep(ClearLogTasklet clearLogTasklet) {
 
 		return stepBuilderFactory.get("Db001Step")
-				.transactionManager(transactionManager)
-				.tasklet(new ClearLogTasklet())
+				.tasklet(clearLogTasklet)
 				.build();
 	}
 }

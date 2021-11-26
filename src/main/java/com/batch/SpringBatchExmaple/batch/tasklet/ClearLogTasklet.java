@@ -15,6 +15,7 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -24,6 +25,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
+@StepScope
 public class ClearLogTasklet implements Tasklet, StepExecutionListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClearLogTasklet.class);
 
@@ -36,38 +38,38 @@ public class ClearLogTasklet implements Tasklet, StepExecutionListener {
 	private String defaultMonth;
 
 	/** 查詢指定區間內的 JobExecution Id */
-	private static final String SQL_QUERY_JOB_EXECUTION_ID = "select BATCH_JOB_EXECUTION.JOB_EXECUTION_ID from OTRLXFXS01.BATCH_JOB_EXECUTION"
+	private static final String SQL_QUERY_JOB_EXECUTION_ID = "select BATCH_JOB_EXECUTION.JOB_EXECUTION_ID from Ashley.BATCH_JOB_EXECUTION"
 			+ " where BATCH_JOB_EXECUTION.CREATE_TIME < :clearDate";
 
 	/** 依照 JobExecution Id 取得 JobInstance Id*/
 	private static final String SQL_QUERY_JOB_INSTANCE_ID = "select BATCH_JOB_INSTANCE.JOB_INSTANCE_ID"
-			+ " from OTRLXFXS01.BATCH_JOB_INSTANCE"
-			+ " join OTRLXFXS01.BATCH_JOB_EXECUTION on BATCH_JOB_EXECUTION.JOB_INSTANCE_ID = BATCH_JOB_INSTANCE.JOB_INSTANCE_ID"
+			+ " from Ashley.BATCH_JOB_INSTANCE"
+			+ " join Ashley.BATCH_JOB_EXECUTION on BATCH_JOB_EXECUTION.JOB_INSTANCE_ID = BATCH_JOB_INSTANCE.JOB_INSTANCE_ID"
 			+ " where BATCH_JOB_EXECUTION.JOB_EXECUTION_ID in (:jobExecutionIdList)";
 
 	/** 依照 JobExecution Id 取得 StepExecution Id*/
 	private static final String SQL_QUERY_STEP_EXECUTION_ID = "select BATCH_STEP_EXECUTION.STEP_EXECUTION_ID"
-			+ " from OTRLXFXS01.BATCH_STEP_EXECUTION"
-			+ " join OTRLXFXS01.BATCH_JOB_EXECUTION on BATCH_JOB_EXECUTION.JOB_EXECUTION_ID = BATCH_STEP_EXECUTION.JOB_EXECUTION_ID"
+			+ " from Ashley.BATCH_STEP_EXECUTION"
+			+ " join Ashley.BATCH_JOB_EXECUTION on BATCH_JOB_EXECUTION.JOB_EXECUTION_ID = BATCH_STEP_EXECUTION.JOB_EXECUTION_ID"
 			+ " where BATCH_JOB_EXECUTION.JOB_EXECUTION_ID in (:jobExecutionIdList)";
 
 	/** 1. 刪除 STEP_EXECUTION_CONTEXT */
-	private static final String SQL_DELETE_BATCH_STEP_EXECUTION_CONTEXT = "delete from OTRLXFXS01.BATCH_STEP_EXECUTION_CONTEXT where STEP_EXECUTION_ID in (:stepExecutionIdList)";
+	private static final String SQL_DELETE_BATCH_STEP_EXECUTION_CONTEXT = "delete from Ashley.BATCH_STEP_EXECUTION_CONTEXT where STEP_EXECUTION_ID in (:stepExecutionIdList)";
 
 	/** 2. 刪除 JOB_EXECUTION_CONTEXT */
-	private static final String SQL_DELETE_BATCH_JOB_EXECUTION_CONTEXT = "delete from OTRLXFXS01.BATCH_JOB_EXECUTION_CONTEXT where JOB_EXECUTION_ID in (:jobExecutionIdList)";
+	private static final String SQL_DELETE_BATCH_JOB_EXECUTION_CONTEXT = "delete from Ashley.BATCH_JOB_EXECUTION_CONTEXT where JOB_EXECUTION_ID in (:jobExecutionIdList)";
 
 	/** 3. 刪除 STEP_EXECUTION */
-	private static final String SQL_DELETE_BATCH_STEP_EXECUTION = "delete from OTRLXFXS01.BATCH_STEP_EXECUTION where STEP_EXECUTION_ID in (:stepExecutionIdList)";
+	private static final String SQL_DELETE_BATCH_STEP_EXECUTION = "delete from Ashley.BATCH_STEP_EXECUTION where STEP_EXECUTION_ID in (:stepExecutionIdList)";
 
 	/** 4. 刪除 JOB_EXECUTION_PARAMS */
-	private static final String SQL_DELETE_BATCH_JOB_EXECUTION_PARAMS = "delete from OTRLXFXS01.BATCH_JOB_EXECUTION_PARAMS where JOB_EXECUTION_ID in (:jobExecutionIdList)";
+	private static final String SQL_DELETE_BATCH_JOB_EXECUTION_PARAMS = "delete from Ashley.BATCH_JOB_EXECUTION_PARAMS where JOB_EXECUTION_ID in (:jobExecutionIdList)";
 
 	/** 5. 刪除 JOB_EXECUTION */
-	private static final String SQL_DELETE_BATCH_JOB_EXECUTION = "delete from OTRLXFXS01.BATCH_JOB_EXECUTION where CREATE_TIME < :clearDate";
+	private static final String SQL_DELETE_BATCH_JOB_EXECUTION = "delete from Ashley.BATCH_JOB_EXECUTION where CREATE_TIME < :clearDate";
 
 	/** 6. 刪除 JOB_INSTANCE */
-	private static final String SQL_DELETE_BATCH_JOB_INSTANCE = "delete from OTRLXFXS01.BATCH_JOB_INSTANCE where JOB_INSTANCE_ID in (:jobInstanceIdList)";
+	private static final String SQL_DELETE_BATCH_JOB_INSTANCE = "delete from Ashley.BATCH_JOB_INSTANCE where JOB_INSTANCE_ID in (:jobInstanceIdList)";
 
 	@Autowired
 	private NamedParameterJdbcTemplate jdbcTemplate;
